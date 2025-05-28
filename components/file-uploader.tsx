@@ -11,9 +11,10 @@ interface FileUploaderProps {
   label: string
   description: string
   icon?: React.ReactNode
+  onFileChange?: (file: File | null) => void
 }
 
-export function FileUploader({ label, description, icon }: FileUploaderProps) {
+export function FileUploader({ label, description, icon, onFileChange }: FileUploaderProps) {
   const [file, setFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
@@ -28,19 +29,21 @@ export function FileUploader({ label, description, icon }: FileUploaderProps) {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
-    setIsDragging(false)
-
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedFile = e.dataTransfer.files[0]
-      setFile(droppedFile)
+      updateFile(e.dataTransfer.files[0])
     }
+  }
+
+  const updateFile = (newFile: File | null) => {
+    setFile(newFile)
+    if (onFileChange) onFileChange(newFile)
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0])
+      updateFile(e.target.files[0])  // Gọi updateFile để setFile & onFileChange
     }
-  }
+  }  
 
   const removeFile = () => {
     setFile(null)

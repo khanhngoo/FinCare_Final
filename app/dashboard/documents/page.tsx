@@ -11,6 +11,44 @@ import { FileText, Building2, CreditCard, Search, Filter, Download, Trash2, Eye,
 export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
+  const [files, setFiles] = useState<{ [key: string]: File | null }>({
+    "Business_Registration": null,
+    "Business License": null,
+    "Tax ID Documentation": null,
+    "Business Plan": null,
+    // thêm các loại khác tương tự
+  })
+
+  const handleFileChange = (label: string, file: File | null) => {
+    setFiles(prev => ({ ...prev, [label]: file }))
+  }
+
+  const handleSubmit = async () => {
+    // Kiểm tra file bắt buộc
+    for (const [label, file] of Object.entries(files)) {
+      if (!file) {
+        alert(`File "${label}" is required.`)
+        return
+      }
+    }
+
+    const formData = new FormData()
+    for (const [label, file] of Object.entries(files)) {
+      if (file) formData.append(label, file)
+    }
+
+    try {
+      const res = await fetch('http://127.0.0.1:8080/api/document', {
+        method: 'POST',
+        body: formData,
+      })
+      if (!res.ok) throw new Error('Upload failed')
+      alert('Files uploaded successfully!')
+    } catch (err) {
+      alert('Error uploading files')
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
@@ -206,21 +244,25 @@ export default function DocumentsPage() {
                 <FileUploader
                   label="Business Registration"
                   description="Certificate of incorporation or business registration"
+                  onFileChange={(file) => handleFileChange("Business_Registration", file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Business License"
                   description="Current business operating license"
+                  onFileChange={(file) => handleFileChange("Business License", file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Tax ID Documentation"
                   description="EIN or tax identification documents"
+                  onFileChange={(file) => handleFileChange("Tax ID Documentation", file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Business Plan"
                   description="Current business plan"
+                  onFileChange={(file) => handleFileChange("Business Plan", file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
               </div>
@@ -294,6 +336,15 @@ export default function DocumentsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Button
+        onClick={handleSubmit}
+        className="mt-4"
+      >
+        Submit All Documents
+      </Button>
+
+
     </div>
   )
 }
