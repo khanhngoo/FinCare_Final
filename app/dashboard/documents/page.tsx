@@ -12,10 +12,10 @@ export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   const [files, setFiles] = useState<{ [key: string]: File | null }>({
-    "Business_Registration": null,
-    "Business License": null,
-    "Tax ID Documentation": null,
-    "Business Plan": null,
+    "Financial Statement": null,
+    //"Business License": null,
+    //"Tax ID Documentation": null,
+    //"Business Plan": null,
     // thêm các loại khác tương tự
   })
 
@@ -41,11 +41,29 @@ export default function DocumentsPage() {
       const res = await fetch('http://127.0.0.1:8080/api/document', {
         method: 'POST',
         body: formData,
-      })
-      if (!res.ok) throw new Error('Upload failed')
-      alert('Files uploaded successfully!')
+      });
+  
+      
+      if (!res.ok) {
+        throw new Error('Upload failed');
+      }
+  
+      
+      const data = await res.json();
+      console.log("OCR Texts:", data); 
+  
+      
+      if (data.texts) {
+        
+        data.texts.forEach((text: any) => {
+          console.log(text);
+        });
+      } else {
+        console.log("No OCR data found.");
+      }
+  
     } catch (err) {
-      alert('Error uploading files')
+      console.error("Error uploading file:", err);
     }
   }
 
@@ -244,25 +262,25 @@ export default function DocumentsPage() {
                 <FileUploader
                   label="Business Registration"
                   description="Certificate of incorporation or business registration"
-                  onFileChange={(file) => handleFileChange("Business_Registration", file)}
+                  //onFileChange={(file) => handleFileChange("Business_Registration", file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Business License"
                   description="Current business operating license"
-                  onFileChange={(file) => handleFileChange("Business License", file)}
+                  //onFileChange={(file) => handleFileChange("Business License", file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Tax ID Documentation"
                   description="EIN or tax identification documents"
-                  onFileChange={(file) => handleFileChange("Tax ID Documentation", file)}
+                  //onFileChange={(file) => handleFileChange("Tax ID Documentation", file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Business Plan"
                   description="Current business plan"
-                  onFileChange={(file) => handleFileChange("Business Plan", file)}
+                  //onFileChange={(file) => handleFileChange("Business Plan", file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
               </div>
@@ -286,6 +304,7 @@ export default function DocumentsPage() {
                 <FileUploader
                   label="Financial Statements"
                   description="Balance sheet and income statements"
+                  onFileChange={(file) => handleFileChange("Financial Statement", file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
