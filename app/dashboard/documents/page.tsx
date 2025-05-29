@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -9,6 +10,8 @@ import { FileUploader } from "@/components/file-uploader"
 import { FileText, Building2, CreditCard, Search, Filter, Download, Trash2, Eye, Plus } from "lucide-react"
 
 export default function DocumentsPage() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
   const [files, setFiles] = useState<{ [key: string]: File | null }>({
@@ -38,32 +41,28 @@ export default function DocumentsPage() {
     }
 
     try {
+      setLoading(true)  // Bật loading trước khi gửi request
+
       const res = await fetch('http://127.0.0.1:8080/api/document', {
         method: 'POST',
         body: formData,
-      });
-  
-      
-      if (!res.ok) {
-        throw new Error('Upload failed');
-      }
-  
-      
-      const data = await res.json();
-      console.log("OCR Texts:", data); 
-  
-      
-      if (data.texts) {
-        
-        data.texts.forEach((text: any) => {
-          console.log(text);
-        });
-      } else {
-        console.log("No OCR data found.");
-      }
-  
+      })
+
+      if (!res.ok) throw new Error('Upload failed')
+
+      const data = await res.json()
+      const dataStr = encodeURIComponent(JSON.stringify(data))
+
+      // Chuyển trang khi có kết quả
+      router.push({
+        pathname: "/test_insights",
+        query: { data: dataStr },
+      })
     } catch (err) {
-      console.error("Error uploading file:", err);
+      console.error("Error uploading file:", err)
+      alert("Có lỗi xảy ra khi upload file.")
+    } finally {
+      setLoading(false)  // Tắt loading sau khi xong
     }
   }
 
@@ -356,11 +355,31 @@ export default function DocumentsPage() {
         </TabsContent>
       </Tabs>
 
-      <Button
-        onClick={handleSubmit}
-        className="mt-4"
-      >
-        Submit All Documents
+      <Button onClick={handleSubmit} disabled={loading}>
+        {loading ? (
+          // Hiển thị spinner hoặc chữ Loading
+          <svg
+            className="animate-spin h-5 w-5 mr-2 text-white inline-block"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8H4z"
+            />
+          </svg>
+        ) : null}
+        {loading ? "Uploading..." : "Submit All Documents"}
       </Button>
 
 
