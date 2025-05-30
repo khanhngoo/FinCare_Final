@@ -273,11 +273,11 @@ def get_document():
         
         # Trả về JSON đầy đủ
         return jsonify({
-            "score_current_ratio": round(score1, 2),
-            "score_quick_ratio": round(score2, 2),
-            "score_debt_to_assets": round(score3, 2),
-            "score_roe": round(score4, 2),
-            "total_score": round(total_score, 2),
+            "score_current_ratio": score1,
+            "score_quick_ratio": score2,
+            "score_debt_to_assets": score3,
+            "score_roe": score4,
+            "total_score": total_score,
             "classification_BIDV": results_dict["BIDV"],
             "classification_Techcombank": results_dict["Techcombank"],
             "classification_Vietcombank": results_dict["Vietcombank"],
