@@ -53,16 +53,13 @@ export default function DocumentsPage() {
       const data = await res.json()
       const dataStr = encodeURIComponent(JSON.stringify(data))
 
-      // Chuyển trang khi có kết quả
-      router.push({
-        pathname: "/test_insights",
-        query: { data: dataStr },
-      })
+      router.push(`/dashboard/test_ingsight?data=${dataStr}`)
+      
     } catch (err) {
       console.error("Error uploading file:", err)
       alert("Có lỗi xảy ra khi upload file.")
     } finally {
-      setLoading(false)  // Tắt loading sau khi xong
+      setLoading(false)  
     }
   }
 
