@@ -51,9 +51,12 @@ export default function DocumentsPage() {
       if (!res.ok) throw new Error('Upload failed')
 
       const data = await res.json()
-      const dataStr = encodeURIComponent(JSON.stringify(data))
-
-      router.push(`/dashboard/test_ingsight?data=${dataStr}`)
+      
+      // Store the analysis data in localStorage for the loan options page
+      localStorage.setItem('loan-analysis-data', JSON.stringify(data))
+      
+      // Redirect to loan options page
+      router.push('/dashboard/loan-options')
       
     } catch (err) {
       console.error("Error uploading file:", err)
