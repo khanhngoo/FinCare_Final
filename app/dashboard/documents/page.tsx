@@ -1,5 +1,6 @@
 "use client"
 
+import { useDocuments } from "@/contexts/document-context"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -13,32 +14,33 @@ export default function DocumentsPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const { 
+    documents,
+    updateDocument,
+    deleteDocument,
+    getDocumentsByCategory,
+    setIsSubmitted
+  } = useDocuments()
 
-  const [files, setFiles] = useState<{ [key: string]: File | null }>({
-    "Financial Statement": null,
-    //"Business License": null,
-    //"Tax ID Documentation": null,
-    //"Business Plan": null,
-    // thêm các loại khác tương tự
-  })
-
-  const handleFileChange = (label: string, file: File | null) => {
-    setFiles(prev => ({ ...prev, [label]: file }))
+  const handleFileChange = (id: string, file: File | null) => {
+    updateDocument(id, file)
   }
 
   const handleSubmit = async () => {
-    // Kiểm tra file bắt buộc
-    for (const [label, file] of Object.entries(files)) {
-      if (!file) {
-        alert(`File "${label}" is required.`)
-        return
-      }
+    // Validate required documents
+    const missingRequired = documents.filter(doc => doc.required && !doc.uploaded)
+    if (missingRequired.length > 0) {
+      alert(`Missing required documents: ${missingRequired.map(d => d.name).join(', ')}`)
+      return
     }
 
+    // Build FormData from uploaded documents
     const formData = new FormData()
-    for (const [label, file] of Object.entries(files)) {
-      if (file) formData.append(label, file)
-    }
+    documents.forEach(doc => {
+      if (doc.uploaded && doc.file) {
+        formData.append(doc.name, doc.file as File)
+      }
+    })
 
     try {
       setLoading(true)  // Bật loading trước khi gửi request
@@ -54,6 +56,7 @@ export default function DocumentsPage() {
       
       // Store the analysis data in localStorage for the loan options page
       localStorage.setItem('loan-analysis-data', JSON.stringify(data))
+      setIsSubmitted(true)
       
       // Redirect to loan options page
       router.push('/dashboard/loan-options')
@@ -261,25 +264,25 @@ export default function DocumentsPage() {
                 <FileUploader
                   label="Business Registration"
                   description="Certificate of incorporation or business registration"
-                  //onFileChange={(file) => handleFileChange("Business_Registration", file)}
+                  onFileChange={(file) => handleFileChange('business-registration', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Business License"
                   description="Current business operating license"
-                  //onFileChange={(file) => handleFileChange("Business License", file)}
+                  onFileChange={(file) => handleFileChange('business-license', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Tax ID Documentation"
                   description="EIN or tax identification documents"
-                  //onFileChange={(file) => handleFileChange("Tax ID Documentation", file)}
+                  onFileChange={(file) => handleFileChange('tax-id', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Business Plan"
                   description="Current business plan"
-                  //onFileChange={(file) => handleFileChange("Business Plan", file)}
+                  onFileChange={(file) => handleFileChange('business-plan', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
               </div>
@@ -298,22 +301,25 @@ export default function DocumentsPage() {
                 <FileUploader
                   label="Bank Statements"
                   description="Last 6 months of business bank statements"
+                  onFileChange={(file) => handleFileChange('bank-statements', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Financial Statements"
                   description="Balance sheet and income statements"
-                  onFileChange={(file) => handleFileChange("Financial Statement", file)}
+                  onFileChange={(file) => handleFileChange('financial-statements', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Tax Returns"
                   description="Last 2 years of business tax returns"
+                  onFileChange={(file) => handleFileChange('tax-returns', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Cash Flow Projections"
                   description="Projected cash flow for next 12 months"
+                  onFileChange={(file) => handleFileChange('cash-flow', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
               </div>
@@ -332,21 +338,25 @@ export default function DocumentsPage() {
                 <FileUploader
                   label="Property Documents"
                   description="Deeds, titles, or leases for business property"
+                  onFileChange={(file) => handleFileChange('property-documents', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Equipment Documentation"
                   description="Proof of ownership for major equipment"
+                  onFileChange={(file) => handleFileChange('equipment-documentation', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Inventory Records"
                   description="Current inventory valuation and records"
+                  onFileChange={(file) => handleFileChange('inventory-records', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
                 <FileUploader
                   label="Other Assets"
                   description="Documentation for any other business assets"
+                  onFileChange={(file) => handleFileChange('other-assets', file)}
                   icon={<FileText className="h-4 w-4" />}
                 />
               </div>

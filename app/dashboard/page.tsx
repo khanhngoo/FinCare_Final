@@ -1,44 +1,55 @@
+"use client"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { FileText, AlertCircle, Lightbulb, PlusCircle, CheckCircle2, ArrowRight, Clock } from "lucide-react"
+import { useDocuments } from "@/contexts/document-context"
 
 export default function DashboardPage() {
+  const { 
+    getProgress,
+    getCompletedDocumentsCount,
+    getTotalDocumentsCount,
+    getDocumentsByCategory,
+    documents } = useDocuments()
+
+
+  const progress = getProgress()
   // Mock data for onboarding progress
   const onboardingSteps = [
     {
       id: 1,
       title: "Profile Documents",
       description: "Business registration, license, and tax ID",
-      status: "completed",
-      progress: 100,
-      documents: ["Business Registration", "Business License", "Tax ID"],
-      completedDocs: 3,
-      totalDocs: 3,
+      status: progress.profile === 100 ? "completed" : progress.profile > 0 ? "in-progress" : "pending",
+      progress: progress.profile,
+      documents: getDocumentsByCategory('profile').map(doc => doc.name),
+      completedDocs: getDocumentsByCategory('profile').filter(doc => doc.uploaded).length,
+      totalDocs: getDocumentsByCategory('profile').length,
       link: "/dashboard/documents?tab=profile",
     },
     {
       id: 2,
       title: "Financial Documents",
       description: "Bank statements, financial reports, tax returns",
-      status: "in-progress",
-      progress: 65,
-      documents: ["Bank Statements", "Financial Statements", "Tax Returns", "Cash Flow"],
-      completedDocs: 2,
-      totalDocs: 4,
+      status: progress.financial === 100 ? "completed" : progress.financial > 0 ? "in-progress" : "pending",
+      progress: progress.financial,
+      documents: getDocumentsByCategory('financial').map(doc => doc.name),
+      completedDocs: getDocumentsByCategory('financial').filter(doc => doc.uploaded).length,
+      totalDocs: getDocumentsByCategory('financial').length,
       link: "/dashboard/documents?tab=financial",
     },
     {
       id: 3,
       title: "Collateral Documents",
       description: "Property deeds, equipment ownership, inventory",
-      status: "pending",
-      progress: 25,
-      documents: ["Property Documents", "Equipment Documentation", "Inventory Records"],
-      completedDocs: 1,
-      totalDocs: 3,
+      status: progress.collateral === 100 ? "completed" : progress.collateral > 0 ? "in-progress" : "pending",
+      progress: progress.collateral,
+      documents: getDocumentsByCategory('collateral').map(doc => doc.name),
+      completedDocs: getDocumentsByCategory('collateral').filter(doc => doc.uploaded).length,
+      totalDocs: getDocumentsByCategory('collateral').length,
       link: "/dashboard/documents?tab=collateral",
     },
     {
