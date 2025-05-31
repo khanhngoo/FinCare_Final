@@ -8,7 +8,7 @@ export default function Loading() {
   
   const steps = [
     { icon: FileText, text: "Scanning documents...", duration: 2000 },
-    { icon: Brain, text: "AI analyzing financial data...", duration: 3000 },
+    { icon: Brain, text: "AI analyzing financial data...", duration: 10000 },
     { icon: CheckCircle2, text: "Matching loan options...", duration: 2000 },
   ]
 
@@ -17,7 +17,7 @@ export default function Loading() {
       if (currentStep < steps.length - 1) {
         setCurrentStep(currentStep + 1)
       }
-    }, steps[currentStep]?.duration || 2000)
+    }, steps[currentStep]?.duration || 20000)
 
     return () => clearTimeout(timer)
   }, [currentStep, steps])

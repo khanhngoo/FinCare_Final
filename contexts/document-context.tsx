@@ -26,6 +26,8 @@ interface DocumentContextType {
   }
   isSubmitted: boolean
   setIsSubmitted: (submitted: boolean) => void
+  isAnalyzed: boolean
+  setIsAnalyzed: (analyzed: boolean) => void
   getCompletedDocumentsCount: () => number
   getTotalDocumentsCount: () => number
 }
@@ -137,11 +139,13 @@ const initialDocuments: DocumentInfo[] = [
 export function DocumentProvider({ children }: { children: React.ReactNode }) {
   const [documents, setDocuments] = useState<DocumentInfo[]>(initialDocuments)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isAnalyzed, setIsAnalyzed] = useState(false)
 
   // Load from localStorage on mount
   useEffect(() => {
     const savedDocuments = localStorage.getItem('fincare-documents')
     const savedSubmitted = localStorage.getItem('fincare-submitted')
+    const savedAnalyzed = localStorage.getItem('fincare-analyzed')
     
     if (savedDocuments) {
       try {
@@ -155,6 +159,10 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
     if (savedSubmitted) {
       setIsSubmitted(JSON.parse(savedSubmitted))
     }
+    
+    if (savedAnalyzed) {
+      setIsAnalyzed(JSON.parse(savedAnalyzed))
+    }
   }, [])
 
   // Save to localStorage when documents change
@@ -166,6 +174,11 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     localStorage.setItem('fincare-submitted', JSON.stringify(isSubmitted))
   }, [isSubmitted])
+
+  // Save analyzed status
+  useEffect(() => {
+    localStorage.setItem('fincare-analyzed', JSON.stringify(isAnalyzed))
+  }, [isAnalyzed])
 
   const updateDocument = (id: string, file: File | null) => {
     setDocuments(prev => prev.map(doc => 
@@ -227,6 +240,8 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
       getProgress,
       isSubmitted,
       setIsSubmitted,
+      isAnalyzed,
+      setIsAnalyzed,
       getCompletedDocumentsCount,
       getTotalDocumentsCount
     }}>

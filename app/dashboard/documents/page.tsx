@@ -19,7 +19,8 @@ export default function DocumentsPage() {
     updateDocument,
     deleteDocument,
     getDocumentsByCategory,
-    setIsSubmitted
+    setIsSubmitted,
+    setIsAnalyzed
   } = useDocuments()
 
   const handleFileChange = (id: string, file: File | null) => {
@@ -27,12 +28,6 @@ export default function DocumentsPage() {
   }
 
   const handleSubmit = async () => {
-    // Notify about missing required documents but allow submission
-    const missingRequired = documents.filter(doc => doc.required && !doc.uploaded)
-    if (missingRequired.length > 0) {
-      alert(`You are submitting with missing documents: ${missingRequired.map(d => d.name).join(', ')}`)
-    }
-
     // Build FormData from uploaded documents
     const formData = new FormData()
     documents.forEach(doc => {
@@ -42,11 +37,11 @@ export default function DocumentsPage() {
         } else {
           formData.append(doc.name, doc.file as File)
         }
-      } 
+      }
     })
 
     try {
-      setLoading(true)  // Bật loading trước khi gửi request
+      setLoading(true)
 
       const res = await fetch('http://127.0.0.1:8080/api/document', {
         method: 'POST',
@@ -56,19 +51,16 @@ export default function DocumentsPage() {
       if (!res.ok) throw new Error('Upload failed')
 
       const data = await res.json()
-      
-      // Store the analysis data in localStorage for the loan options page
+
       localStorage.setItem('loan-analysis-data', JSON.stringify(data))
       setIsSubmitted(true)
-      
-      // Redirect to loan options page
+      setIsAnalyzed(false)
       router.push('/dashboard/loan-options')
-      
     } catch (err) {
-      console.error("Error uploading file:", err)
-      alert("Có lỗi xảy ra khi upload file.")
+      console.error('Error uploading file:', err)
+      alert('Có lỗi xảy ra khi upload file.')
     } finally {
-      setLoading(false)  
+      setLoading(false)
     }
   }
 
