@@ -27,19 +27,22 @@ export default function DocumentsPage() {
   }
 
   const handleSubmit = async () => {
-    // Validate required documents
+    // Notify about missing required documents but allow submission
     const missingRequired = documents.filter(doc => doc.required && !doc.uploaded)
     if (missingRequired.length > 0) {
-      alert(`Missing required documents: ${missingRequired.map(d => d.name).join(', ')}`)
-      return
+      alert(`You are submitting with missing documents: ${missingRequired.map(d => d.name).join(', ')}`)
     }
 
     // Build FormData from uploaded documents
     const formData = new FormData()
     documents.forEach(doc => {
       if (doc.uploaded && doc.file) {
-        formData.append(doc.name, doc.file as File)
-      }
+        if (doc.id === 'financial-statements') {
+          formData.append('Financial Statement', doc.file as File)
+        } else {
+          formData.append(doc.name, doc.file as File)
+        }
+      } 
     })
 
     try {
@@ -67,6 +70,26 @@ export default function DocumentsPage() {
     } finally {
       setLoading(false)  
     }
+  }
+
+  const uploadedDocs = documents.filter(doc => doc.uploaded)
+
+  const handleDownload = (docId: string) => {
+    const doc = documents.find(d => d.id === docId)
+    if (doc && doc.file) {
+      const url = URL.createObjectURL(doc.file as File)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = doc.file.name
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  const handleRemove = (docId: string) => {
+    deleteDocument(docId)
   }
 
   return (
@@ -134,120 +157,46 @@ export default function DocumentsPage() {
                   <div>Actions</div>
                 </div>
 
-                <div className="grid grid-cols-5 items-center py-3 border-b">
-                  <div className="col-span-2 flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-primary" />
-                    <span className="font-medium">Business Registration.pdf</span>
-                  </div>
-                  <div>Profile</div>
-                  <div className="text-sm text-muted-foreground">May 10, 2023</div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Download className="h-4 w-4" />
-                      <span className="sr-only">Download</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </div>
+                {uploadedDocs.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
+                )}
 
-                <div className="grid grid-cols-5 items-center py-3 border-b">
-                  <div className="col-span-2 flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-primary" />
-                    <span className="font-medium">Business License.pdf</span>
+                {uploadedDocs.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="grid grid-cols-5 items-center py-3 border-b last:border-b-0"
+                  >
+                    <div className="col-span-2 flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-primary" />
+                      <span className="font-medium truncate max-w-xs">{doc.file?.name || doc.name}</span>
+                    </div>
+                    <div className="capitalize">{doc.category}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString() : "-"}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleDownload(doc.id)}
+                        disabled={!doc.file}
+                      >
+                        <Download className="h-4 w-4" />
+                        <span className="sr-only">Download</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleRemove(doc.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </div>
                   </div>
-                  <div>Profile</div>
-                  <div className="text-sm text-muted-foreground">May 10, 2023</div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Download className="h-4 w-4" />
-                      <span className="sr-only">Download</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-5 items-center py-3 border-b">
-                  <div className="col-span-2 flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-primary" />
-                    <span className="font-medium">Bank Statements - Q1 2023.pdf</span>
-                  </div>
-                  <div>Financial</div>
-                  <div className="text-sm text-muted-foreground">Apr 15, 2023</div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Download className="h-4 w-4" />
-                      <span className="sr-only">Download</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-5 items-center py-3 border-b">
-                  <div className="col-span-2 flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-primary" />
-                    <span className="font-medium">Financial Statements 2022.pdf</span>
-                  </div>
-                  <div>Financial</div>
-                  <div className="text-sm text-muted-foreground">Mar 20, 2023</div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Download className="h-4 w-4" />
-                      <span className="sr-only">Download</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-5 items-center py-3">
-                  <div className="col-span-2 flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-primary" />
-                    <span className="font-medium">Property Deed.pdf</span>
-                  </div>
-                  <div>Collateral</div>
-                  <div className="text-sm text-muted-foreground">Feb 05, 2023</div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Download className="h-4 w-4" />
-                      <span className="sr-only">Download</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
