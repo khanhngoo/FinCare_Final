@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { FileUploader } from "@/components/file-uploader"
 import { FileText, Building2, CreditCard, Search, Filter, Download, Trash2, Eye, Plus } from "lucide-react"
+import LoadingAnalysis from "../loan-options/loading"
 
 export default function DocumentsPage() {
   const router = useRouter()
@@ -62,6 +63,11 @@ export default function DocumentsPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show full-screen AI loading while uploading / waiting for analysis
+  if (loading) {
+    return <LoadingAnalysis />
   }
 
   const uploadedDocs = documents.filter(doc => doc.uploaded)
