@@ -1,0 +1,45 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env/
+.env.*
+
+# Environment variable files
+*.env
+*.secret
+
+# Logs and debug files
+*.log
+
+# Jupyter / IPython
+.ipynb_checkpoints
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# Pytest
+.cache/
+
+# MyPy / Pylint
+.mypy_cache/
+.pytest_cache/
+
+# Coverage
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+
+# pyright (optional)
+pyrightconfig.json
+
+# Compiled Cython files
+*.so

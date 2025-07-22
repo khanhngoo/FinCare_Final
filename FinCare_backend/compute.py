@@ -33,28 +33,3 @@ def compute_score(input_data: Dict[str, float], config: Dict, weights: Dict, sec
         total_weight += weight
 
     return round(total_score / total_weight) if total_weight > 0 else 0.0
-
-# Example usage
-if __name__ == "__main__":
-    config = load_config("config.json")
-    weights = load_config("weights.json")
-
-    example_input = {
-        "current_ratio": 1.1,
-        "quick_ratio": 0.6,
-        "cash_ratio": 0.2,
-        "wc_turn": 4.2,
-        "inv_turn": 9.0,
-        "recv_turn": 8.0,
-        "fa_util": 5.5,
-        "debt_assets": 58,
-        "ltdebt_equity": 48,
-        "gross_margin": 25,
-        "ebit_interest": 2.8,
-        "roe": 14,
-        "roa": 6.5,
-        "net_margin": 9.5
-    }
-
-    score = compute_score(example_input, config, weights, sector="food_bev_feed", scale="medium")
-    print("Tín dụng score:", score)
