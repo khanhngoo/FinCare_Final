@@ -46,7 +46,7 @@ export function FileUploader({ label, description, icon, onFileChange }: FileUpl
   }  
 
   const removeFile = () => {
-    setFile(null)
+    updateFile(null)
   }
 
   return (
